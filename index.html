@@ -1,0 +1,2138 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pi Voice Partner</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0b0b14;
+        --bg-card: #12121e;
+        --bg-card-alt: #181828;
+        --border: #252538;
+        --text: #e4e4ef;
+        --text-muted: #5e5e78;
+        --accent: #e8a838;
+        --accent-dim: #c48820;
+        --accent-glow: rgba(232, 168, 56, 0.2);
+        --success: #22c997;
+        --success-glow: rgba(34, 201, 151, 0.18);
+        --error: #ef4444;
+        --error-glow: rgba(239, 68, 68, 0.18);
+        --info: #38bdf8;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Space Grotesk", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+      /* Background blobs */
+      .bg-blob {
+        position: fixed;
+        border-radius: 50%;
+        pointer-events: none;
+        filter: blur(120px);
+        opacity: 0.12;
+        z-index: 0;
+      }
+      .bg-blob-1 {
+        width: 500px;
+        height: 500px;
+        background: var(--accent);
+        top: -100px;
+        right: -100px;
+        animation: blobFloat1 25s ease-in-out infinite;
+      }
+      .bg-blob-2 {
+        width: 400px;
+        height: 400px;
+        background: var(--success);
+        bottom: -80px;
+        left: -80px;
+        animation: blobFloat2 30s ease-in-out infinite;
+      }
+      @keyframes blobFloat1 {
+        0%,
+        100% {
+          transform: translate(0, 0);
+        }
+        50% {
+          transform: translate(-60px, 80px);
+        }
+      }
+      @keyframes blobFloat2 {
+        0%,
+        100% {
+          transform: translate(0, 0);
+        }
+        50% {
+          transform: translate(50px, -60px);
+        }
+      }
+
+      .navbar {
+        background: rgba(11, 11, 20, 0.85);
+        backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--border);
+        z-index: 100;
+      }
+      .navbar-brand {
+        font-weight: 700;
+        letter-spacing: -0.5px;
+      }
+      .navbar-brand .pi-symbol {
+        color: var(--accent);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 1.3em;
+      }
+
+      .main-container {
+        position: relative;
+        z-index: 1;
+        padding-top: 1.5rem;
+        padding-bottom: 2rem;
+      }
+
+      /* Cards */
+      .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        transition: border-color 0.3s;
+      }
+      .card:hover {
+        border-color: rgba(232, 168, 56, 0.3);
+      }
+      .card-header {
+        background: transparent;
+        border-bottom: 1px solid var(--border);
+        font-weight: 600;
+      }
+
+      /* Mode selection cards */
+      .mode-card {
+        cursor: pointer;
+        text-align: center;
+        padding: 1.5rem 1rem;
+        transition: all 0.3s;
+        border: 2px solid var(--border);
+        border-radius: 14px;
+        background: var(--bg-card);
+      }
+      .mode-card:hover {
+        border-color: var(--accent-dim);
+        transform: translateY(-3px);
+      }
+      .mode-card.active {
+        border-color: var(--accent);
+        background: var(--accent-glow);
+        box-shadow: 0 0 30px var(--accent-glow);
+      }
+      .mode-card .mode-icon {
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
+        color: var(--text-muted);
+        transition: color 0.3s;
+      }
+      .mode-card.active .mode-icon {
+        color: var(--accent);
+      }
+      .mode-card h6 {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+      }
+      .mode-card small {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+      }
+
+      /* Range slider */
+      .form-range::-webkit-slider-thumb {
+        background: var(--accent);
+        border: none;
+      }
+      .form-range::-webkit-slider-runnable-track {
+        background: var(--border);
+      }
+      .form-range::-moz-range-thumb {
+        background: var(--accent);
+        border: none;
+      }
+      .form-range::-moz-range-track {
+        background: var(--border);
+      }
+
+      /* Start button */
+      .btn-start {
+        background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+        color: #0b0b14;
+        font-weight: 700;
+        font-size: 1.1rem;
+        padding: 0.85rem 2.5rem;
+        border: none;
+        border-radius: 12px;
+        transition: all 0.3s;
+        letter-spacing: 0.3px;
+      }
+      .btn-start:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px var(--accent-glow);
+        color: #0b0b14;
+      }
+
+      /* Practice panel */
+      .practice-panel {
+        display: none;
+        flex-direction: column;
+        min-height: calc(100vh - 70px);
+      }
+      .practice-panel.active {
+        display: flex;
+      }
+
+      /* Stats bar */
+      .stats-bar {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        padding: 0.75rem 0;
+      }
+      .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+      }
+      .stat-item .stat-value {
+        font-family: "JetBrains Mono", monospace;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .stat-item .stat-value.accent {
+        color: var(--accent);
+      }
+      .stat-item .stat-value.success {
+        color: var(--success);
+      }
+      .stat-item .stat-value.error {
+        color: var(--error);
+      }
+
+      /* Progress bar */
+      .progress-custom {
+        height: 6px;
+        background: var(--border);
+        border-radius: 3px;
+        overflow: hidden;
+      }
+      .progress-custom .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), var(--success));
+        border-radius: 3px;
+        transition: width 0.4s ease;
+      }
+
+      /* Digit display */
+      .digit-area {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem 0;
+        scrollbar-width: thin;
+        scrollbar-color: var(--border) transparent;
+      }
+      .digit-area::-webkit-scrollbar {
+        width: 6px;
+      }
+      .digit-area::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 3px;
+      }
+      .digit-display {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 1.15rem;
+        line-height: 2.2;
+        letter-spacing: 1.5px;
+      }
+      .digit-display .digit-prefix {
+        color: var(--text-muted);
+        font-weight: 600;
+      }
+      .digit {
+        display: inline-block;
+        padding: 1px 3px;
+        border-radius: 4px;
+        transition: all 0.35s ease;
+        position: relative;
+      }
+      .digit.upcoming {
+        color: var(--text-muted);
+        opacity: 0.5;
+      }
+      .digit.correct {
+        color: var(--success);
+        background: var(--success-glow);
+      }
+      .digit.incorrect {
+        color: var(--error);
+        background: var(--error-glow);
+        animation: shake 0.4s ease;
+      }
+      .digit.current {
+        color: var(--accent);
+        background: var(--accent-glow);
+        transform: scale(1.25);
+        box-shadow: 0 0 14px var(--accent-glow);
+        border-radius: 5px;
+      }
+      .digit.hint-highlight {
+        color: #facc15;
+        background: rgba(250, 204, 21, 0.15);
+      }
+      .digit.reading {
+        color: var(--info);
+        background: rgba(56, 189, 248, 0.15);
+      }
+      .digit.group-gap {
+        margin-right: 12px;
+      }
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-4px);
+        }
+        75% {
+          transform: translateX(4px);
+        }
+      }
+      @keyframes pop {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.35);
+        }
+        100% {
+          transform: scale(1.25);
+        }
+      }
+      .digit.pop {
+        animation: pop 0.3s ease;
+      }
+
+      /* Controls area */
+      .controls-area {
+        padding: 1rem 0 0.5rem;
+        flex-shrink: 0;
+      }
+
+      /* Mic button */
+      .mic-btn {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        border: 3px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text);
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+        position: relative;
+        cursor: pointer;
+      }
+      .mic-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .mic-btn.listening {
+        border-color: var(--error);
+        color: var(--error);
+        animation: micPulse 1.5s ease-in-out infinite;
+      }
+      .mic-btn.listening::before {
+        content: "";
+        position: absolute;
+        inset: -10px;
+        border: 2px solid var(--error);
+        border-radius: 50%;
+        animation: micRing 1.5s ease-out infinite;
+        opacity: 0;
+      }
+      @keyframes micPulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 var(--error-glow);
+        }
+        50% {
+          box-shadow: 0 0 20px 5px var(--error-glow);
+        }
+      }
+      @keyframes micRing {
+        0% {
+          transform: scale(0.9);
+          opacity: 0.7;
+        }
+        100% {
+          transform: scale(1.4);
+          opacity: 0;
+        }
+      }
+
+      /* Control buttons */
+      .ctrl-btn {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-muted);
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        cursor: pointer;
+      }
+      .ctrl-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-glow);
+      }
+      .ctrl-btn:disabled {
+        opacity: 0.3;
+        pointer-events: none;
+      }
+
+      /* Feedback area */
+      .feedback-area {
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0;
+      }
+      .feedback-msg {
+        padding: 0.4rem 0.9rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        animation: fadeSlideIn 0.3s ease;
+      }
+      .feedback-msg.correct-fb {
+        background: var(--success-glow);
+        color: var(--success);
+      }
+      .feedback-msg.incorrect-fb {
+        background: var(--error-glow);
+        color: var(--error);
+      }
+      .feedback-msg.info-fb {
+        background: rgba(56, 189, 248, 0.12);
+        color: var(--info);
+      }
+      .feedback-msg.hint-fb {
+        background: rgba(250, 204, 21, 0.12);
+        color: #facc15;
+      }
+      @keyframes fadeSlideIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Text input fallback */
+      .text-input-fallback input {
+        background: var(--bg-card-alt);
+        border: 1px solid var(--border);
+        color: var(--text);
+        font-family: "JetBrains Mono", monospace;
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+      }
+      .text-input-fallback input:focus {
+        border-color: var(--accent);
+        outline: none;
+        box-shadow: 0 0 0 3px var(--accent-glow);
+      }
+
+      /* Stop button */
+      .btn-stop {
+        background: var(--error);
+        color: #fff;
+        font-weight: 600;
+        border: none;
+        border-radius: 10px;
+        padding: 0.5rem 1.5rem;
+        transition: all 0.2s;
+      }
+      .btn-stop:hover {
+        background: #dc2626;
+        color: #fff;
+      }
+
+      /* Results panel */
+      .results-panel {
+        display: none;
+      }
+      .results-panel.active {
+        display: block;
+      }
+      .result-stat {
+        text-align: center;
+        padding: 1.25rem;
+        background: var(--bg-card-alt);
+        border-radius: 12px;
+        border: 1px solid var(--border);
+      }
+      .result-stat .result-value {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 1.8rem;
+        font-weight: 700;
+      }
+      .result-stat .result-label {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+      }
+
+      .btn-secondary-custom {
+        background: var(--bg-card-alt);
+        border: 1px solid var(--border);
+        color: var(--text);
+        font-weight: 600;
+        border-radius: 10px;
+        padding: 0.65rem 1.5rem;
+        transition: all 0.2s;
+      }
+      .btn-secondary-custom:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-glow);
+      }
+
+      /* Listen mode speed btns */
+      .speed-btn {
+        padding: 0.3rem 0.75rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-weight: 500;
+      }
+      .speed-btn.active {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-glow);
+      }
+
+      /* Quiz mode */
+      .quiz-question {
+        font-size: 1.6rem;
+        font-weight: 700;
+        text-align: center;
+        padding: 2rem 0;
+      }
+      .quiz-question .q-position {
+        color: var(--accent);
+        font-family: "JetBrains Mono", monospace;
+      }
+      .quiz-option {
+        width: 60px;
+        height: 60px;
+        border-radius: 14px;
+        border: 2px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text);
+        font-size: 1.4rem;
+        font-family: "JetBrains Mono", monospace;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .quiz-option:hover {
+        border-color: var(--accent);
+        transform: translateY(-2px);
+      }
+      .quiz-option.correct-opt {
+        border-color: var(--success);
+        background: var(--success-glow);
+        color: var(--success);
+      }
+      .quiz-option.wrong-opt {
+        border-color: var(--error);
+        background: var(--error-glow);
+        color: var(--error);
+      }
+      .quiz-option:disabled {
+        pointer-events: none;
+        opacity: 0.5;
+      }
+
+      /* Toast */
+      .toast-container {
+        z-index: 9999;
+      }
+      .toast {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        color: var(--text);
+      }
+
+      /* Confetti */
+      .confetti-piece {
+        position: fixed;
+        width: 8px;
+        height: 8px;
+        border-radius: 2px;
+        z-index: 9998;
+        pointer-events: none;
+        animation: confettiFall 2.5s ease-out forwards;
+      }
+      @keyframes confettiFall {
+        0% {
+          transform: translateY(0) rotate(0deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(100vh) rotate(720deg);
+          opacity: 0;
+        }
+      }
+
+      /* Best score badge */
+      .best-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        background: rgba(250, 204, 21, 0.1);
+        color: #facc15;
+        border: 1px solid rgba(250, 204, 21, 0.2);
+      }
+
+      /* No speech support */
+      .no-speech-note {
+        color: var(--text-muted);
+        font-size: 0.82rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      /* Responsive */
+      @media (max-width: 576px) {
+        .digit-display {
+          font-size: 1rem;
+          letter-spacing: 1px;
+        }
+        .mic-btn {
+          width: 64px;
+          height: 64px;
+          font-size: 1.3rem;
+        }
+        .stats-bar {
+          gap: 0.5rem;
+        }
+        .stat-item {
+          font-size: 0.78rem;
+        }
+        .quiz-question {
+          font-size: 1.2rem;
+        }
+      }
+
+      /* Reduced motion */
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Background blobs -->
+    <div class="bg-blob bg-blob-1"></div>
+    <div class="bg-blob bg-blob-2"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="#">
+          <span class="pi-symbol">&pi;</span> Voice Partner
+        </a>
+        <button
+          class="btn btn-sm btn-secondary-custom"
+          data-bs-toggle="modal"
+          data-bs-target="#helpModal"
+          aria-label="Help"
+        >
+          <i class="fas fa-question-circle me-1"></i> Help
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-container">
+      <div class="container" style="max-width: 800px">
+        <!-- ===== SETUP PANEL ===== -->
+        <div id="setupPanel" class="pt-3">
+          <div class="text-center mb-4">
+            <h1 class="fw-bold mb-2" style="font-size: 2.2rem">
+              Memorize
+              <span
+                style="
+                  color: var(--accent);
+                  font-family: &quot;JetBrains Mono&quot;, monospace;
+                "
+                >Pi</span
+              >
+            </h1>
+            <p class="text-muted">
+              Practice with voice recognition, listening drills, and quizzes
+            </p>
+          </div>
+
+          <!-- Target digits -->
+          <div class="card p-4 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <label class="fw-semibold mb-0">Digits to practice</label>
+              <span
+                id="targetValue"
+                class="fw-bold"
+                style="
+                  color: var(--accent);
+                  font-family: &quot;JetBrains Mono&quot;, monospace;
+                  font-size: 1.2rem;
+                "
+                >150</span
+              >
+            </div>
+            <input
+              type="range"
+              class="form-range"
+              id="targetRange"
+              min="100"
+              max="330"
+              value="150"
+              step="10"
+            />
+            <div class="d-flex justify-content-between mt-1">
+              <small class="text-muted">100</small>
+              <small class="text-muted">330</small>
+            </div>
+            <div id="bestScoreArea" class="mt-3" style="display: none">
+              <span class="best-badge"
+                ><i class="fas fa-trophy"></i> <span id="bestScoreText"></span
+              ></span>
+            </div>
+          </div>
+
+          <!-- Start from -->
+          <div class="card p-4 mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <label class="fw-semibold mb-0">Start from digit</label>
+              <input
+                type="number"
+                id="startFromInput"
+                class="form-control"
+                style="
+                  width: 80px;
+                  text-align: center;
+                  background: var(--bg-card-alt);
+                  border-color: var(--border);
+                  color: var(--text);
+                  font-family: &quot;JetBrains Mono&quot;, monospace;
+                "
+                min="1"
+                value="1"
+              />
+            </div>
+            <small class="text-muted mt-1 d-block"
+              >Already know the first 100? Start from 101 to practice
+              further.</small
+            >
+          </div>
+
+          <!-- Mode selection -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <div class="mode-card active" data-mode="recite">
+                <div class="mode-icon"><i class="fas fa-microphone"></i></div>
+                <h6>Recite</h6>
+                <small>Speak digits from memory</small>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mode-card" data-mode="listen">
+                <div class="mode-icon"><i class="fas fa-headphones"></i></div>
+                <h6>Listen</h6>
+                <small>Hear digits read aloud</small>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mode-card" data-mode="quiz">
+                <div class="mode-icon"><i class="fas fa-brain"></i></div>
+                <h6>Quiz</h6>
+                <small>Test random positions</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Start button -->
+          <div class="text-center mb-3">
+            <button class="btn btn-start" id="btnStart">
+              <i class="fas fa-play me-2"></i>Begin Practice
+            </button>
+          </div>
+          <div
+            id="noSpeechWarning"
+            class="text-center no-speech-note justify-content-center"
+            style="display: none"
+          >
+            <i class="fas fa-exclamation-triangle"></i>
+            Speech recognition not supported in this browser. Text input will be
+            available.
+          </div>
+        </div>
+
+        <!-- ===== PRACTICE PANEL ===== -->
+        <div id="practicePanel" class="practice-panel pt-3">
+          <!-- Stats bar -->
+          <div class="stats-bar" id="statsBar">
+            <div class="stat-item">
+              <i class="fas fa-crosshairs" style="color: var(--accent)"></i>
+              <span>Position:</span>
+              <span class="stat-value accent" id="statPosition">1</span>
+              <span class="text-muted">/</span>
+              <span class="stat-value" id="statTarget">150</span>
+            </div>
+            <div class="stat-item" id="statCorrectWrap">
+              <i class="fas fa-check" style="color: var(--success)"></i>
+              <span class="stat-value success" id="statCorrect">0</span>
+            </div>
+            <div class="stat-item" id="statIncorrectWrap">
+              <i class="fas fa-times" style="color: var(--error)"></i>
+              <span class="stat-value error" id="statIncorrect">0</span>
+            </div>
+            <div class="stat-item" id="statStreakWrap">
+              <i class="fas fa-fire" style="color: #f97316"></i>
+              <span class="stat-value" id="statStreak" style="color: #f97316"
+                >0</span
+              >
+            </div>
+          </div>
+
+          <!-- Progress bar -->
+          <div class="progress-custom mb-2">
+            <div
+              class="progress-fill"
+              id="progressFill"
+              style="width: 0%"
+            ></div>
+          </div>
+
+          <!-- Digit display area -->
+          <div class="digit-area" id="digitArea">
+            <div class="digit-display" id="digitDisplay"></div>
+          </div>
+
+          <!-- Feedback area -->
+          <div class="feedback-area" id="feedbackArea"></div>
+
+          <!-- Recite mode controls -->
+          <div class="controls-area" id="reciteControls">
+            <div
+              class="d-flex align-items-center justify-content-center gap-3 mb-3"
+            >
+              <button class="ctrl-btn" id="btnHint" title="Hint (H)">
+                <i class="fas fa-lightbulb"></i>
+              </button>
+              <button
+                class="mic-btn"
+                id="btnMic"
+                title="Start listening (Space)"
+                aria-label="Microphone"
+              >
+                <i class="fas fa-microphone"></i>
+              </button>
+              <button
+                class="ctrl-btn"
+                id="btnReadChunk"
+                title="Read next 10 digits (R)"
+              >
+                <i class="fas fa-volume-up"></i>
+              </button>
+            </div>
+            <div class="text-input-fallback text-center mb-2">
+              <input
+                type="text"
+                id="textInput"
+                placeholder="Or type digits here..."
+                autocomplete="off"
+                aria-label="Type digits"
+              />
+            </div>
+            <div class="text-center">
+              <button class="btn btn-stop btn-sm" id="btnStopRecite">
+                <i class="fas fa-stop me-1"></i>End Session
+              </button>
+            </div>
+          </div>
+
+          <!-- Listen mode controls -->
+          <div class="controls-area" id="listenControls" style="display: none">
+            <div
+              class="d-flex align-items-center justify-content-center gap-3 mb-3"
+            >
+              <button class="ctrl-btn" id="btnListenRestart" title="Restart">
+                <i class="fas fa-redo"></i>
+              </button>
+              <button
+                class="mic-btn"
+                id="btnListenPlay"
+                title="Play/Pause"
+                aria-label="Play or Pause"
+              >
+                <i class="fas fa-play"></i>
+              </button>
+            </div>
+            <div
+              class="d-flex align-items-center justify-content-center gap-2 mb-3"
+            >
+              <span class="text-muted me-1" style="font-size: 0.82rem"
+                >Speed:</span
+              >
+              <button class="speed-btn" data-speed="0.6">Slow</button>
+              <button class="speed-btn active" data-speed="1">Normal</button>
+              <button class="speed-btn" data-speed="1.6">Fast</button>
+            </div>
+            <div class="text-center">
+              <button class="btn btn-stop btn-sm" id="btnStopListen">
+                <i class="fas fa-stop me-1"></i>End Session
+              </button>
+            </div>
+          </div>
+
+          <!-- Quiz mode controls -->
+          <div class="controls-area" id="quizControls" style="display: none">
+            <div id="quizContent"></div>
+            <div class="text-center mt-3">
+              <button class="btn btn-stop btn-sm" id="btnStopQuiz">
+                <i class="fas fa-stop me-1"></i>End Session
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== RESULTS PANEL ===== -->
+        <div id="resultsPanel" class="results-panel pt-3">
+          <div class="card p-4 mb-4 text-center">
+            <h2 class="fw-bold mb-1" id="resultTitle">Session Complete</h2>
+            <p class="text-muted mb-4" id="resultSubtitle">Great effort!</p>
+            <div class="row g-3 mb-4">
+              <div class="col-4">
+                <div class="result-stat">
+                  <div
+                    class="result-value"
+                    style="color: var(--accent)"
+                    id="resultDigits"
+                  >
+                    0
+                  </div>
+                  <div class="result-label">Digits Recited</div>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="result-stat">
+                  <div
+                    class="result-value"
+                    style="color: var(--success)"
+                    id="resultAccuracy"
+                  >
+                    0%
+                  </div>
+                  <div class="result-label">Accuracy</div>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="result-stat">
+                  <div
+                    class="result-value"
+                    style="color: #f97316"
+                    id="resultStreak"
+                  >
+                    0
+                  </div>
+                  <div class="result-label">Best Streak</div>
+                </div>
+              </div>
+            </div>
+            <!-- Mistake locations -->
+            <div id="resultMistakes" style="display: none" class="mb-4">
+              <p class="text-muted small mb-2">Mistakes at positions:</p>
+              <div
+                id="mistakeList"
+                class="d-flex flex-wrap gap-2 justify-content-center"
+              ></div>
+            </div>
+            <div id="resultBestBadge" style="display: none" class="mb-3">
+              <span
+                class="best-badge"
+                style="font-size: 0.9rem; padding: 0.4rem 1rem"
+                ><i class="fas fa-trophy"></i> New Personal Best!</span
+              >
+            </div>
+            <div class="d-flex gap-3 justify-content-center">
+              <button class="btn btn-start" id="btnRetry">
+                <i class="fas fa-redo me-2"></i>Try Again
+              </button>
+              <button class="btn btn-secondary-custom" id="btnBackSetup">
+                <i class="fas fa-cog me-2"></i>Settings
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Help Modal -->
+    <div
+      class="modal fade"
+      id="helpModal"
+      tabindex="-1"
+      aria-labelledby="helpModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div
+          class="modal-content"
+          style="background: var(--bg-card); border: 1px solid var(--border)"
+        >
+          <div class="modal-header" style="border-color: var(--border)">
+            <h5 class="modal-title fw-bold" id="helpModalLabel">
+              <i
+                class="fas fa-info-circle me-2"
+                style="color: var(--accent)"
+              ></i
+              >How to Use
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div
+            class="modal-body"
+            style="color: var(--text-muted); line-height: 1.7"
+          >
+            <p>
+              <strong style="color: var(--text)">Recite Mode:</strong> Click the
+              microphone and speak digits one by one. The app validates each
+              digit in real-time. Say "hint" for help.
+            </p>
+            <p>
+              <strong style="color: var(--text)">Listen Mode:</strong> Hear the
+              digits read aloud at your chosen speed. Follow along visually as
+              each digit is highlighted.
+            </p>
+            <p>
+              <strong style="color: var(--text)">Quiz Mode:</strong> Answer 10
+              random-position questions to test your memory of specific digits.
+            </p>
+            <hr style="border-color: var(--border)" />
+            <p>
+              <strong style="color: var(--text)">Keyboard shortcuts:</strong>
+            </p>
+            <ul class="mb-0">
+              <li>
+                <kbd
+                  style="
+                    background: var(--bg-card-alt);
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                    border: 1px solid var(--border);
+                  "
+                  >Space</kbd
+                >
+                — Toggle listening
+              </li>
+              <li>
+                <kbd
+                  style="
+                    background: var(--bg-card-alt);
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                    border: 1px solid var(--border);
+                  "
+                  >H</kbd
+                >
+                — Get a hint
+              </li>
+              <li>
+                <kbd
+                  style="
+                    background: var(--bg-card-alt);
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                    border: 1px solid var(--border);
+                  "
+                  >R</kbd
+                >
+                — Read next 10 digits
+              </li>
+              <li>
+                <kbd
+                  style="
+                    background: var(--bg-card-alt);
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                    border: 1px solid var(--border);
+                  "
+                  >Esc</kbd
+                >
+                — End session
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast container -->
+    <div
+      class="toast-container position-fixed bottom-0 end-0 p-3"
+      id="toastContainer"
+    ></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      (function () {
+        "use strict";
+
+        // ===== Pi digits (350 digits after decimal point) =====
+        const PI_DIGITS =
+          "14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196442881097566593344612847564823378678316527120190914564856692346034861045432664821339360726024914127372458700660631558817488152092096282925409171536436789259036001133053054882046652138414695194151160943305727036575959195309218611738193261179310511854807446237996274956735188575272489122793818301194912";
+
+        // Word-to-digit mapping including common misrecognitions
+        const WORD_TO_DIGIT = {
+          zero: "0",
+          one: "1",
+          two: "2",
+          three: "3",
+          four: "4",
+          five: "5",
+          six: "6",
+          seven: "7",
+          eight: "8",
+          nine: "9",
+          oh: "0",
+          o: "0",
+          yeah: "1",
+          once: "1",
+          // Common misrecognitions
+          for: "4",
+          to: "2",
+          too: "2",
+          tree: "3",
+          free: "3",
+          ate: "8",
+          win: "1",
+          won: "1",
+          sex: "6",
+          sick: "6",
+          fine: "5",
+          high: "5",
+          ate: "8",
+          night: "9",
+          line: "9",
+          sun: "1",
+          fun: "1",
+          see: "6",
+          sea: "6",
+          door: "4",
+          ate: "8",
+          ay: "8",
+          age: "8",
+          half: "5",
+          hive: "5",
+        };
+
+        const DIGIT_NAMES = [
+          "zero",
+          "one",
+          "two",
+          "three",
+          "four",
+          "five",
+          "six",
+          "seven",
+          "eight",
+          "nine",
+        ];
+        const MILESTONES = [50, 100, 150, 200, 250, 300, 330];
+
+        // ===== State =====
+        let state = {
+          mode: "recite",
+          target: 150,
+          startFrom: 1,
+          currentPosition: 1,
+          correctCount: 0,
+          incorrectCount: 0,
+          streak: 0,
+          bestStreak: 0,
+          mistakes: [],
+          isListening: false,
+          sessionActive: false,
+          listenPlaying: false,
+          listenSpeed: 1,
+          listenPosition: 1,
+          quizQuestions: [],
+          quizIndex: 0,
+          quizScore: 0,
+          hintUsed: false,
+        };
+
+        // ===== DOM helpers =====
+        const $ = (sel) => document.querySelector(sel);
+        const $$ = (sel) => document.querySelectorAll(sel);
+
+        // ===== Speech recognition =====
+        const SpeechRecognition =
+          window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
+        let speechSupported = false;
+
+        if (SpeechRecognition) {
+          speechSupported = true;
+          recognition = new SpeechRecognition();
+          recognition.continuous = true;
+          recognition.interimResults = false;
+          recognition.lang = "en-US";
+          recognition.maxAlternatives = 1;
+
+          recognition.onresult = (event) => {
+            if (!state.sessionActive || state.mode !== "recite") return;
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+              if (event.results[i].isFinal) {
+                const transcript = event.results[i][0].transcript;
+                handleSpokenInput(transcript);
+              }
+            }
+          };
+
+          recognition.onerror = (event) => {
+            if (event.error === "no-speech" || event.error === "aborted")
+              return;
+            console.warn("Speech error:", event.error);
+            if (event.error === "not-allowed") {
+              showToast(
+                "Microphone access denied. Use text input instead.",
+                "warning",
+              );
+              stopListening();
+            }
+          };
+
+          recognition.onend = () => {
+            // Restart if still supposed to be listening
+            if (
+              state.isListening &&
+              state.sessionActive &&
+              state.mode === "recite"
+            ) {
+              try {
+                recognition.start();
+              } catch (e) {}
+            }
+          };
+        } else {
+          $("#noSpeechWarning").style.display = "flex";
+        }
+
+        // ===== Speech synthesis =====
+        const synth = window.speechSynthesis;
+
+        function speak(text, rate = 1) {
+          return new Promise((resolve) => {
+            if (!synth) {
+              resolve();
+              return;
+            }
+            synth.cancel();
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.rate = rate;
+            utter.pitch = 1;
+            utter.volume = 1;
+            // Try to pick a clear English voice
+            const voices = synth.getVoices();
+            const preferred =
+              voices.find(
+                (v) => v.lang.startsWith("en") && v.name.includes("Google"),
+              ) ||
+              voices.find((v) => v.lang.startsWith("en") && !v.localService) ||
+              voices.find((v) => v.lang.startsWith("en"));
+            if (preferred) utter.voice = preferred;
+            utter.onend = resolve;
+            utter.onerror = resolve;
+            synth.speak(utter);
+          });
+        }
+
+        function stopSpeaking() {
+          if (synth) synth.cancel();
+        }
+
+        // Preload voices
+        if (synth) synth.getVoices();
+        if (synth) synth.onvoiceschanged = () => synth.getVoices();
+
+        // ===== Parse spoken text into digit string =====
+        function parseDigits(text) {
+          let result = "";
+          const words = text.toLowerCase().trim().split(/\s+/);
+          for (const word of words) {
+            if (word === "hint" || word === "hint.") return "HINT";
+            if (word === "stop" || word === "stop.") return "STOP";
+            if (WORD_TO_DIGIT[word] !== undefined) {
+              result += WORD_TO_DIGIT[word];
+            } else if (/^\d+$/.test(word)) {
+              for (const ch of word) result += ch;
+            }
+          }
+          return result;
+        }
+
+        // ===== Handle spoken or typed input =====
+        function handleSpokenInput(transcript) {
+          const parsed = parseDigits(transcript);
+          if (parsed === "HINT") {
+            giveHint();
+            return;
+          }
+          if (parsed === "STOP") {
+            endSession();
+            return;
+          }
+          if (!parsed) return;
+
+          // Process each digit
+          for (let i = 0; i < parsed.length; i++) {
+            if (state.currentPosition > state.target) break;
+            const spoken = parsed[i];
+            const expected = PI_DIGITS[state.currentPosition - 1];
+            if (spoken === expected) {
+              state.correctCount++;
+              state.streak++;
+              if (state.streak > state.bestStreak)
+                state.bestStreak = state.streak;
+              setDigitState(state.currentPosition, "correct");
+              showFeedback(
+                "correct-fb",
+                `<i class="fas fa-check me-1"></i>${spoken}`,
+              );
+              state.currentPosition++;
+              checkMilestone();
+            } else {
+              state.incorrectCount++;
+              state.streak = 0;
+              state.mistakes.push(state.currentPosition);
+              setDigitState(state.currentPosition, "incorrect");
+              showFeedback(
+                "incorrect-fb",
+                `<i class="fas fa-times me-1"></i>Said "${spoken}", expected "${expected}"`,
+              );
+              state.currentPosition++;
+            }
+          }
+
+          updateStats();
+          updateProgress();
+          scrollToCurrentDigit();
+
+          // Check if completed
+          if (state.currentPosition > state.target) {
+            setTimeout(() => {
+              stopListening();
+              showResults();
+            }, 500);
+          }
+        }
+
+        // ===== Start / Stop listening =====
+        function startListening() {
+          if (!speechSupported || state.isListening) return;
+          state.isListening = true;
+          try {
+            recognition.start();
+          } catch (e) {}
+          $("#btnMic").classList.add("listening");
+          $("#btnMic").innerHTML = '<i class="fas fa-microphone-slash"></i>';
+          showFeedback(
+            "info-fb",
+            '<i class="fas fa-ear-listen me-1"></i>Listening...',
+          );
+        }
+
+        function stopListening() {
+          if (!state.isListening) return;
+          state.isListening = false;
+          try {
+            recognition.stop();
+          } catch (e) {}
+          $("#btnMic").classList.remove("listening");
+          $("#btnMic").innerHTML = '<i class="fas fa-microphone"></i>';
+        }
+
+        function toggleListening() {
+          if (state.isListening) stopListening();
+          else startListening();
+        }
+
+        // ===== Hint: speak next 5 digits =====
+        async function giveHint() {
+          if (!state.sessionActive || state.mode !== "recite") return;
+          state.hintUsed = true;
+          const from = state.currentPosition;
+          const to = Math.min(from + 4, state.target);
+          let hintStr = "";
+          for (let i = from; i <= to; i++) {
+            hintStr += PI_DIGITS[i - 1] + " ";
+            setDigitState(i, "hint-highlight");
+          }
+          showFeedback(
+            "hint-fb",
+            `<i class="fas fa-lightbulb me-1"></i>Hint: ${hintStr.trim()}`,
+          );
+          await speak(hintStr.trim(), 0.8);
+          // Reset hint highlights after 2 seconds
+          setTimeout(() => {
+            for (let i = from; i <= to; i++) {
+              if (i < state.currentPosition) setDigitState(i, "correct");
+              else if (i === state.currentPosition) setDigitState(i, "current");
+              else setDigitState(i, "upcoming");
+            }
+          }, 2500);
+        }
+
+        // ===== Read next 10 digits =====
+        async function readChunk() {
+          if (!state.sessionActive || state.mode !== "recite") return;
+          const from = state.currentPosition;
+          const to = Math.min(from + 9, state.target);
+          let chunkStr = "";
+          for (let i = from; i <= to; i++) {
+            chunkStr += PI_DIGITS[i - 1] + " ";
+            setDigitState(i, "reading");
+          }
+          showFeedback(
+            "info-fb",
+            `<i class="fas fa-volume-up me-1"></i>Reading: ${chunkStr.trim()}`,
+          );
+          await speak(chunkStr.trim(), state.listenSpeed);
+          setTimeout(() => {
+            for (let i = from; i <= to; i++) {
+              if (i < state.currentPosition) setDigitState(i, "correct");
+              else if (i === state.currentPosition) setDigitState(i, "current");
+              else setDigitState(i, "upcoming");
+            }
+          }, 1500);
+        }
+
+        // ===== Milestone check =====
+        function checkMilestone() {
+          const pos = state.currentPosition - 1;
+          if (MILESTONES.includes(pos)) {
+            showToast(`Milestone reached: ${pos} digits!`, "success");
+            speak(`Nice! ${pos} digits!`, 1.1);
+          }
+          // Streak encouragement
+          if (state.streak === 20) speak("Twenty in a row! Keep going!", 1.1);
+          else if (state.streak === 50) speak("Fifty streak! Amazing!", 1.1);
+        }
+
+        // ===== Digit grid =====
+        function buildDigitGrid() {
+          const container = $("#digitDisplay");
+          container.innerHTML = '<span class="digit-prefix">3.</span>';
+          for (let i = state.startFrom; i <= state.target; i++) {
+            const span = document.createElement("span");
+            span.className = "digit upcoming";
+            span.textContent = PI_DIGITS[i - 1];
+            span.dataset.pos = i;
+            // Add gap after every 10th digit relative to the start
+            if ((i - state.startFrom + 1) % 10 === 0) {
+              span.classList.add("group-gap");
+            }
+            container.appendChild(span);
+          }
+          // Set first as current
+          setDigitState(state.startFrom, "current");
+        }
+
+        function setDigitState(pos, className) {
+          const el = $(`.digit[data-pos="${pos}"]`);
+          if (!el) return;
+          el.className = "digit " + className;
+          if (className === "correct") el.classList.add("pop");
+        }
+
+        function scrollToCurrentDigit() {
+          const el = $(`.digit[data-pos="${state.currentPosition}"]`);
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+
+        // ===== Stats & Progress =====
+        function updateStats() {
+          $("#statPosition").textContent = Math.min(
+            state.currentPosition,
+            state.target,
+          );
+          $("#statTarget").textContent = state.target;
+          $("#statCorrect").textContent = state.correctCount;
+          $("#statIncorrect").textContent = state.incorrectCount;
+          $("#statStreak").textContent = state.streak;
+        }
+
+        function updateProgress() {
+          const range = state.target - state.startFrom + 1;
+          const done = state.currentPosition - state.startFrom;
+          const pct = Math.min(100, Math.max(0, (done / range) * 100));
+          $("#progressFill").style.width = pct + "%";
+        }
+
+        // ===== Feedback =====
+        function showFeedback(cls, html) {
+          const area = $("#feedbackArea");
+          area.innerHTML = `<div class="feedback-msg ${cls}">${html}</div>`;
+        }
+
+        function clearFeedback() {
+          $("#feedbackArea").innerHTML = "";
+        }
+
+        // ===== Toast =====
+        function showToast(message, type = "info") {
+          const container = $("#toastContainer");
+          const id = "toast-" + Date.now();
+          const iconMap = {
+            success: "fa-check-circle",
+            warning: "fa-exclamation-triangle",
+            info: "fa-info-circle",
+            error: "fa-times-circle",
+          };
+          const colorMap = {
+            success: "var(--success)",
+            warning: "#facc15",
+            info: "var(--info)",
+            error: "var(--error)",
+          };
+          const div = document.createElement("div");
+          div.id = id;
+          div.className = "toast align-items-center border-0";
+          div.setAttribute("role", "alert");
+          div.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body d-flex align-items-center gap-2">
+                        <i class="fas ${iconMap[type]}" style="color:${colorMap[type]};"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>`;
+          container.appendChild(div);
+          const toast = new bootstrap.Toast(div, { delay: 3000 });
+          toast.show();
+          div.addEventListener("hidden.bs.toast", () => div.remove());
+        }
+
+        // ===== Session management =====
+        function startSession() {
+          const target = parseInt($("#targetRange").value);
+          let startFrom = parseInt($("#startFromInput").value) || 1;
+          startFrom = Math.max(1, Math.min(startFrom, target - 1));
+
+          state = {
+            mode: state.mode,
+            target: target,
+            startFrom: startFrom,
+            currentPosition: startFrom,
+            correctCount: 0,
+            incorrectCount: 0,
+            streak: 0,
+            bestStreak: 0,
+            mistakes: [],
+            isListening: false,
+            sessionActive: true,
+            listenPlaying: false,
+            listenSpeed: 1,
+            listenPosition: startFrom,
+            quizQuestions: [],
+            quizIndex: 0,
+            quizScore: 0,
+            hintUsed: false,
+          };
+
+          showPanel("practice");
+          buildDigitGrid();
+          updateStats();
+          updateProgress();
+          clearFeedback();
+
+          // Show mode-specific controls
+          $("#reciteControls").style.display =
+            state.mode === "recite" ? "block" : "none";
+          $("#listenControls").style.display =
+            state.mode === "listen" ? "block" : "none";
+          $("#quizControls").style.display =
+            state.mode === "quiz" ? "block" : "none";
+
+          // Show/hide stats based on mode
+          const showReciteStats = state.mode === "recite";
+          $("#statCorrectWrap").style.display = showReciteStats
+            ? "flex"
+            : "none";
+          $("#statIncorrectWrap").style.display = showReciteStats
+            ? "flex"
+            : "none";
+          $("#statStreakWrap").style.display = showReciteStats
+            ? "flex"
+            : "none";
+
+          if (state.mode === "listen") {
+            $("#statPosition").parentElement.querySelector(
+              ".text-muted",
+            ).textContent = "Reading:";
+            startListenMode();
+          } else if (state.mode === "quiz") {
+            $("#statPosition").parentElement.querySelector(
+              ".text-muted",
+            ).textContent = "Question:";
+            generateQuizQuestions();
+            showQuizQuestion();
+          } else {
+            $("#statPosition").parentElement.querySelector(
+              ".text-muted",
+            ).textContent = "Position:";
+            $("#textInput").value = "";
+            // Auto-start listening on desktop
+            // startListening(); // Let user initiate
+          }
+
+          // Scroll to first digit
+          setTimeout(scrollToCurrentDigit, 100);
+        }
+
+        function endSession() {
+          stopListening();
+          stopSpeaking();
+          state.sessionActive = false;
+          state.listenPlaying = false;
+
+          if (state.mode === "recite") {
+            showResults();
+          } else {
+            showPanel("setup");
+            updateBestScoreDisplay();
+          }
+        }
+
+        // ===== Results =====
+        function showResults() {
+          const total = state.correctCount + state.incorrectCount;
+          const accuracy =
+            total > 0 ? Math.round((state.correctCount / total) * 100) : 0;
+          const digitsReached = state.currentPosition - state.startFrom;
+
+          $("#resultDigits").textContent = digitsReached;
+          $("#resultAccuracy").textContent = accuracy + "%";
+          $("#resultStreak").textContent = state.bestStreak;
+
+          if (
+            accuracy >= 95 &&
+            digitsReached >= (state.target - state.startFrom + 1) * 0.9
+          ) {
+            $("#resultTitle").textContent = "Outstanding!";
+            $("#resultSubtitle").textContent =
+              "Near-perfect recall. You really know your pi!";
+            launchConfetti();
+          } else if (accuracy >= 80) {
+            $("#resultTitle").textContent = "Well Done!";
+            $("#resultSubtitle").textContent =
+              "Solid performance. Keep practicing to perfect it.";
+          } else if (accuracy >= 50) {
+            $("#resultTitle").textContent = "Good Effort";
+            $("#resultSubtitle").textContent =
+              "You're getting there. Try listening mode to reinforce.";
+          } else {
+            $("#resultTitle").textContent = "Keep Practicing";
+            $("#resultSubtitle").textContent =
+              "Try the listen mode first, then come back to recite.";
+          }
+
+          // Mistakes
+          if (state.mistakes.length > 0) {
+            $("#resultMistakes").style.display = "block";
+            $("#mistakeList").innerHTML = state.mistakes
+              .map(
+                (pos) =>
+                  `<span style="background:var(--error-glow); color:var(--error); padding:2px 8px; border-radius:6px; font-family:'JetBrains Mono',monospace; font-size:0.82rem;">#${pos}</span>`,
+              )
+              .join("");
+          } else {
+            $("#resultMistakes").style.display = "none";
+          }
+
+          // Check best score
+          const isNewBest = saveBestScore(state.target, accuracy);
+          $("#resultBestBadge").style.display = isNewBest
+            ? "inline-flex"
+            : "none";
+
+          showPanel("results");
+        }
+
+        function saveBestScore(target, accuracy) {
+          const key = `pi_best_${target}`;
+          const prev = parseFloat(localStorage.getItem(key)) || 0;
+          if (accuracy > prev) {
+            localStorage.setItem(key, accuracy.toString());
+            return true;
+          }
+          return false;
+        }
+
+        function getBestScore(target) {
+          return parseFloat(localStorage.getItem(`pi_best_${target}`)) || 0;
+        }
+
+        function updateBestScoreDisplay() {
+          const target = parseInt($("#targetRange").value);
+          const best = getBestScore(target);
+          if (best > 0) {
+            $("#bestScoreArea").style.display = "block";
+            $("#bestScoreText").textContent =
+              `Best: ${best}% accuracy at ${target} digits`;
+          } else {
+            $("#bestScoreArea").style.display = "none";
+          }
+        }
+
+        // ===== Panel switching =====
+        function showPanel(panel) {
+          $("#setupPanel").style.display = panel === "setup" ? "block" : "none";
+          $("#practicePanel").classList.toggle("active", panel === "practice");
+          $("#resultsPanel").classList.toggle("active", panel === "results");
+        }
+
+        // ===== Listen Mode =====
+        async function startListenMode() {
+          state.listenPlaying = true;
+          state.listenPosition = state.startFrom;
+          $("#btnListenPlay").innerHTML = '<i class="fas fa-pause"></i>';
+          await readDigitsAloud();
+        }
+
+        function stopListenMode() {
+          state.listenPlaying = false;
+          stopSpeaking();
+          $("#btnListenPlay").innerHTML = '<i class="fas fa-play"></i>';
+        }
+
+        async function readDigitsAloud() {
+          while (state.listenPlaying && state.listenPosition <= state.target) {
+            const pos = state.listenPosition;
+            const digit = PI_DIGITS[pos - 1];
+
+            setDigitState(pos, "reading");
+            state.currentPosition = pos;
+            updateStats();
+            updateProgress();
+            scrollToCurrentDigit();
+
+            await speak(digit, state.listenSpeed);
+            await delay(180 / state.listenSpeed);
+
+            setDigitState(pos, "correct");
+
+            // Extra pause after every 10th digit
+            if ((pos - state.startFrom + 1) % 10 === 0) {
+              await delay(400 / state.listenSpeed);
+            }
+
+            state.listenPosition++;
+          }
+
+          if (state.listenPlaying) {
+            state.listenPlaying = false;
+            $("#btnListenPlay").innerHTML = '<i class="fas fa-play"></i>';
+            showFeedback(
+              "correct-fb",
+              '<i class="fas fa-check me-1"></i>Finished reading all digits!',
+            );
+            showToast(
+              "Listening complete! Try reciting from memory.",
+              "success",
+            );
+          }
+        }
+
+        function delay(ms) {
+          return new Promise((r) => setTimeout(r, ms));
+        }
+
+        // ===== Quiz Mode =====
+        function generateQuizQuestions() {
+          const count = 10;
+          const range = state.target - state.startFrom + 1;
+          const positions = new Set();
+          while (positions.size < Math.min(count, range)) {
+            positions.add(state.startFrom + Math.floor(Math.random() * range));
+          }
+          state.quizQuestions = [...positions].sort((a, b) => a - b);
+          state.quizIndex = 0;
+          state.quizScore = 0;
+        }
+
+        function showQuizQuestion() {
+          if (state.quizIndex >= state.quizQuestions.length) {
+            showQuizResults();
+            return;
+          }
+
+          const pos = state.quizQuestions[state.quizIndex];
+          const correct = PI_DIGITS[pos - 1];
+          state.currentPosition = pos;
+          updateStats();
+          updateProgress();
+
+          // Generate wrong options
+          const options = new Set([correct]);
+          while (options.size < 4) {
+            options.add(Math.floor(Math.random() * 10).toString());
+          }
+          const shuffled = [...options].sort(() => Math.random() - 0.5);
+
+          // Highlight the position in the grid
+          $$(".digit").forEach((el) => {
+            const p = parseInt(el.dataset.pos);
+            if (p === pos) el.className = "digit current";
+            else if (p < pos) el.className = "digit correct";
+            else el.className = "digit upcoming";
+          });
+          scrollToCurrentDigit();
+
+          const content = $("#quizContent");
+          content.innerHTML = `
+                <div class="quiz-question">
+                    What is digit <span class="q-position">#${pos}</span> of pi?
+                </div>
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    ${shuffled
+                      .map(
+                        (d) => `
+                        <button class="quiz-option" data-digit="${d}">${d}</button>
+                    `,
+                      )
+                      .join("")}
+                </div>
+            `;
+
+          // Wire up option clicks
+          content.querySelectorAll(".quiz-option").forEach((btn) => {
+            btn.addEventListener("click", () => handleQuizAnswer(btn, correct));
+          });
+
+          // Also allow voice/keyboard input
+          $("#textInput").value = "";
+          $("#textInput").focus();
+        }
+
+        function handleQuizAnswer(btn, correct) {
+          const chosen = btn.dataset.digit;
+          const allBtns = $$(".quiz-option");
+          allBtns.forEach((b) => (b.disabled = true));
+
+          if (chosen === correct) {
+            btn.classList.add("correct-opt");
+            state.quizScore++;
+            showFeedback(
+              "correct-fb",
+              '<i class="fas fa-check me-1"></i>Correct!',
+            );
+            speak("Correct!", 1.1);
+          } else {
+            btn.classList.add("wrong-opt");
+            allBtns.forEach((b) => {
+              if (b.dataset.digit === correct) b.classList.add("correct-opt");
+            });
+            showFeedback(
+              "incorrect-fb",
+              `<i class="fas fa-times me-1"></i>The answer was ${correct}`,
+            );
+            speak(`The answer is ${DIGIT_NAMES[parseInt(correct)]}`, 0.9);
+          }
+
+          state.quizIndex++;
+          setTimeout(showQuizQuestion, 1500);
+        }
+
+        // Handle text input for quiz mode
+        function handleQuizTextInput(text) {
+          const parsed = parseDigits(text);
+          if (!parsed || parsed.length === 0) return;
+          const chosen = parsed[0];
+          const pos = state.quizQuestions[state.quizIndex];
+          const correct = PI_DIGITS[pos - 1];
+          // Find and click the matching button
+          const btn = $(`.quiz-option[data-digit="${chosen}"]`);
+          if (btn && !btn.disabled) btn.click();
+        }
+
+        function showQuizResults() {
+          const pct = Math.round(
+            (state.quizScore / state.quizQuestions.length) * 100,
+          );
+          $("#resultDigits").textContent =
+            `${state.quizScore}/${state.quizQuestions.length}`;
+          $("#resultAccuracy").textContent = pct + "%";
+          $("#resultStreak").textContent = "-";
+          $("#resultMistakes").style.display = "none";
+          $("#resultBestBadge").style.display = "none";
+
+          if (pct >= 90) {
+            $("#resultTitle").textContent = "Excellent Memory!";
+            $("#resultSubtitle").textContent =
+              "You really know those digit positions well.";
+            launchConfetti();
+          } else if (pct >= 70) {
+            $("#resultTitle").textContent = "Good Recall!";
+            $("#resultSubtitle").textContent =
+              "A few gaps to fill. Keep studying!";
+          } else {
+            $("#resultTitle").textContent = "Needs Work";
+            $("#resultSubtitle").textContent =
+              "Try listen mode to reinforce these positions.";
+          }
+
+          showPanel("results");
+        }
+
+        // ===== Confetti =====
+        function launchConfetti() {
+          const colors = [
+            "#e8a838",
+            "#22c997",
+            "#ef4444",
+            "#38bdf8",
+            "#facc15",
+            "#a78bfa",
+            "#f97316",
+          ];
+          for (let i = 0; i < 60; i++) {
+            const piece = document.createElement("div");
+            piece.className = "confetti-piece";
+            piece.style.left = Math.random() * 100 + "vw";
+            piece.style.top = -10 + "px";
+            piece.style.background =
+              colors[Math.floor(Math.random() * colors.length)];
+            piece.style.animationDuration = 1.5 + Math.random() * 2 + "s";
+            piece.style.animationDelay = Math.random() * 0.8 + "s";
+            piece.style.width = 5 + Math.random() * 8 + "px";
+            piece.style.height = 5 + Math.random() * 8 + "px";
+            piece.style.borderRadius = Math.random() > 0.5 ? "50%" : "2px";
+            document.body.appendChild(piece);
+            setTimeout(() => piece.remove(), 4000);
+          }
+        }
+
+        // ===== Event Listeners =====
+        function setupEventListeners() {
+          // Target range
+          $("#targetRange").addEventListener("input", (e) => {
+            const val = parseInt(e.target.value);
+            $("#targetValue").textContent = val;
+            // Ensure startFrom doesn't exceed target
+            const startInput = $("#startFromInput");
+            if (parseInt(startInput.value) >= val)
+              startInput.value = Math.max(1, val - 1);
+            updateBestScoreDisplay();
+          });
+
+          // Mode cards
+          $$(".mode-card").forEach((card) => {
+            card.addEventListener("click", () => {
+              $$(".mode-card").forEach((c) => c.classList.remove("active"));
+              card.classList.add("active");
+              state.mode = card.dataset.mode;
+            });
+          });
+
+          // Start button
+          $("#btnStart").addEventListener("click", startSession);
+
+          // Mic button (recite mode)
+          $("#btnMic").addEventListener("click", toggleListening);
+
+          // Hint button
+          $("#btnHint").addEventListener("click", giveHint);
+
+          // Read chunk button
+          $("#btnReadChunk").addEventListener("click", readChunk);
+
+          // Text input (recite mode)
+          $("#textInput").addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              const val = $("#textInput").value.trim();
+              if (val) {
+                if (state.mode === "quiz") {
+                  handleQuizTextInput(val);
+                } else {
+                  handleSpokenInput(val);
+                }
+                $("#textInput").value = "";
+              }
+            }
+          });
+
+          // Stop buttons
+          $("#btnStopRecite").addEventListener("click", endSession);
+          $("#btnStopListen").addEventListener("click", endSession);
+          $("#btnStopQuiz").addEventListener("click", endSession);
+
+          // Listen mode controls
+          $("#btnListenPlay").addEventListener("click", () => {
+            if (state.listenPlaying) {
+              stopListenMode();
+              showFeedback(
+                "info-fb",
+                '<i class="fas fa-pause me-1"></i>Paused',
+              );
+            } else {
+              state.listenPosition =
+                state.currentPosition <= state.target
+                  ? state.currentPosition
+                  : state.startFrom;
+              startListenMode();
+            }
+          });
+
+          $("#btnListenRestart").addEventListener("click", () => {
+            stopListenMode();
+            // Reset all digit states
+            for (let i = state.startFrom; i <= state.target; i++) {
+              setDigitState(i, "upcoming");
+            }
+            state.currentPosition = state.startFrom;
+            state.listenPosition = state.startFrom;
+            updateStats();
+            updateProgress();
+            clearFeedback();
+            setTimeout(() => startListenMode(), 300);
+          });
+
+          // Speed buttons
+          $$(".speed-btn").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              $$(".speed-btn").forEach((b) => b.classList.remove("active"));
+              btn.classList.add("active");
+              state.listenSpeed = parseFloat(btn.dataset.speed);
+            });
+          });
+
+          // Results buttons
+          $("#btnRetry").addEventListener("click", startSession);
+          $("#btnBackSetup").addEventListener("click", () => {
+            showPanel("setup");
+            updateBestScoreDisplay();
+          });
+
+          // Keyboard shortcuts
+          document.addEventListener("keydown", (e) => {
+            if (!state.sessionActive) return;
+            // Don't trigger shortcuts when typing in input
+            if (
+              e.target === $("#textInput") ||
+              e.target === $("#startFromInput")
+            )
+              return;
+
+            if (e.code === "Space") {
+              e.preventDefault();
+              if (state.mode === "recite") toggleListening();
+              else if (state.mode === "listen") $("#btnListenPlay").click();
+            }
+            if (e.key === "h" || e.key === "H") {
+              if (state.mode === "recite") giveHint();
+            }
+            if (e.key === "r" || e.key === "R") {
+              if (state.mode === "recite") readChunk();
+            }
+            if (e.key === "Escape") {
+              endSession();
+            }
+          });
+
+          // Start from input validation
+          $("#startFromInput").addEventListener("change", () => {
+            let val = parseInt($("#startFromInput").value) || 1;
+            const max = parseInt($("#targetRange").value) - 1;
+            val = Math.max(1, Math.min(val, max));
+            $("#startFromInput").value = val;
+          });
+        }
+
+        // ===== Init =====
+        function init() {
+          setupEventListeners();
+          updateBestScoreDisplay();
+          showPanel("setup");
+        }
+
+        init();
+      })();
+    </script>
+  </body>
+</html>
